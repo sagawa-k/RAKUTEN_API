@@ -2,16 +2,27 @@ import requests
 import urllib
 import pandas as pd
 import datetime
+import sys
 
 RANKING_CSV_PATH="./ranking_list_{keyword}_{datetime}.csv"
+APPLICATION_ID=1019079537947262807
 
-def get_api(url):
-    result = requests.get(url)
-    return result.json()
+def get_api(url, params):
+    result = requests.get(url, params=params)
+    if result.status_code == requests.codes.ok:
+      return result.json()
+    else:
+      print("商品名、価格のデータ取得に失敗しました。")
+      sys.exit()
 
 def get_item_info(keyword):
-  url = f"https://app.rakuten.co.jp/services/api/IchibaItem/Search/20170706?format=json&keyword={keyword}&applicationId=1019079537947262807"
-  response = get_api(url)
+  url = "https://app.rakuten.co.jp/services/api/IchibaItem/Search/20170706"
+  params = {
+    "keyword": keyword,
+    "applicationId": APPLICATION_ID,
+    "format": "json"
+  }
+  response = get_api(url, params)
   item_name_list = []
   item_price_list = []
   for item in response["Items"]:
@@ -20,12 +31,17 @@ def get_item_info(keyword):
 
   for item_name, item_price in zip(item_name_list, item_price_list):
     print(f"商品名:{item_name}, 価格:{item_price}")
-  
+
   return response
 
 def get_item_min_max_price(keyword):
-    url = f"https://app.rakuten.co.jp/services/api/Product/Search/20170426?applicationId=1019079537947262807&format=json&keyword={keyword}"
-    response = get_api(url)
+    url = "https://app.rakuten.co.jp/services/api/Product/Search/20170426"
+    params = {
+      "keyword": keyword,
+      "applicationId": APPLICATION_ID,
+      "format": "json"
+    }
+    response = get_api(url, params)
     item_max_price = []
     item_min_price = []
     for item in response["Products"]:
@@ -36,8 +52,13 @@ def get_item_min_max_price(keyword):
     return response
 
 def get_item_ranking(keyword):
-  url = f"https://app.rakuten.co.jp/services/api/IchibaItem/Ranking/20170628?applicationId=1019079537947262807&format=json&keyword={keyword}"
-  response = get_api(url)
+  url = "https://app.rakuten.co.jp/services/api/IchibaItem/Ranking/20170628"
+  params = {
+    "keyword": keyword,
+    "applicationId": APPLICATION_ID,
+    "format": "json"
+  }
+  response = get_api(url, params)
   item_rank = []
   item_name_list = []
   item_price_list = []
@@ -53,8 +74,8 @@ def get_item_ranking(keyword):
   return response
 
 def main():
-    get_item_info("マグカップ")
-    get_item_min_max_price("マグカップ")
-    get_item_ranking("マグカップ")
+    get_item_info("エアマックス")
+    get_item_min_max_price("エアマックス")
+    get_item_ranking("エアマックス")
 
 main()
